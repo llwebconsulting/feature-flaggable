@@ -111,6 +111,9 @@ Lint/UselessRuby2Keywords:
   Enabled: true
 Metrics/CollectionLiteralLength:
   Enabled: true
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
 Naming/BlockForwarding:
   Enabled: true
 Security/CompoundHash:
@@ -265,4 +268,3 @@ Style/SwapValues:
   Enabled: true
 Style/YAMLFileRead:
   Enabled: true
-

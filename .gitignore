@@ -19,3 +19,6 @@
 # ide
 .idea/
 .vscode/
+
+# instructions
+/.github/*.instructions.md
