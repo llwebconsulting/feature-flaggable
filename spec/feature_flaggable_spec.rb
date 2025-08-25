@@ -31,3 +31,47 @@ RSpec.describe 'FeatureFlaggable Railtie integration' do
     expect { load File.expand_path('../lib/feature_flaggable.rb', __dir__) }.not_to raise_error
   end
 end
+
+RSpec.describe FeatureFlaggable, 'public API' do
+  let(:user) { double('User', user_type: :admin) }
+  let(:context) { { business: double('Business') } }
+
+  it 'responds to enabled? and overridden?' do
+    expect(FeatureFlaggable.enabled?(:some_flag, user: user, context: context)).to eq(false)
+    expect(FeatureFlaggable.overridden?(:some_flag)).to eq(false)
+  end
+
+  it 'can override and clear_override' do
+    FeatureFlaggable.override(:some_flag, :all)
+    expect(FeatureFlaggable.registry.overridden?(:some_flag)).to eq(true)
+    FeatureFlaggable.clear_override(:some_flag)
+    expect(FeatureFlaggable.registry.overridden?(:some_flag)).to eq(false)
+  end
+
+  it 'can define segments and predicates' do
+    expect do
+      FeatureFlaggable.define do
+        segment :testers do |_user:, _context: {}|
+          true
+        end
+        predicate :always_true do |_user:, _context: {}|
+          true
+        end
+      end
+    end.not_to raise_error
+  end
+
+  it 'executes block in flaggable if enabled? returns true' do
+    allow(FeatureFlaggable).to receive(:enabled?).and_return(true)
+    result = nil
+    FeatureFlaggable.flaggable(:some_flag, user: user, context: context) { result = 42 }
+    expect(result).to eq(42)
+  end
+
+  it 'does not execute block in flaggable if enabled? returns false' do
+    allow(FeatureFlaggable).to receive(:enabled?).and_return(false)
+    result = nil
+    FeatureFlaggable.flaggable(:some_flag, user: user, context: context) { result = 42 }
+    expect(result).to be_nil
+  end
+end
